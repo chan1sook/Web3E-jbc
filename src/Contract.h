@@ -33,7 +33,7 @@ public:
 
 public:
     Contract(Web3JBC *_web3, const char *address);
-    explicit Contract(long long int networkId);
+    explicit Contract();
     void SetPrivateKey(const char *key);
     string SetupContractData(const char *func, ...);
     string Call(const string *param);

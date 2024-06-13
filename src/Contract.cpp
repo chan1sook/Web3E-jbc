@@ -30,7 +30,7 @@ Contract::Contract(Web3JBC *_web3, const char *address)
     crypto = NULL;
 }
 
-Contract::Contract(long long networkId) : Contract(new Web3JBC(networkId), "") {}
+Contract::Contract() : Contract(new Web3JBC(), "") {}
 
 void Contract::SetPrivateKey(const char *key)
 {
