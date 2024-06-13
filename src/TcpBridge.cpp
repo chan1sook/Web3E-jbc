@@ -1,6 +1,6 @@
 #include "TcpBridge.h"
 #include "Web3JBC.h"
-#include "Util.h"
+#include "Web3Util.h"
 #include "KeyID.h"
 
 static const uint16_t defaultPort = 8003;
@@ -41,11 +41,11 @@ void TcpBridge::startConnection()
 
 void TcpBridge::signChallenge(const BYTE *challenge, int length)
 {
-    keyID->getSignature(packetBuffer + 21, (uint8_t *)challenge, length);       // write sig
-    Util::ConvertHexToBytes(packetBuffer + 1, keyID->getAddress().c_str(), 20); // address
-    packetBuffer[0] = 0x07;                                                     // indicate using stright sig (ie not signPersonal)
+    keyID->getSignature(packetBuffer + 21, (uint8_t *)challenge, length);           // write sig
+    Web3Util::ConvertHexToBytes(packetBuffer + 1, keyID->getAddress().c_str(), 20); // address
+    packetBuffer[0] = 0x07;                                                         // indicate using stright sig (ie not signPersonal)
     int packetLength = 1 + ETHERS_ADDRESS_LENGTH + ETHERS_SIGNATURE_LENGTH;
-    // Serial.println(Util::ConvertBytesToHex(packetBuffer, packetLength).c_str());
+    // Serial.println(Web3Util::ConvertBytesToHex(packetBuffer, packetLength).c_str());
     write(packetBuffer, packetLength);
 }
 
@@ -121,7 +121,7 @@ void TcpBridge::sendRefreshRequest()
 {
     // Encode the data string into a byte array.
     BYTE tokenVal[33];
-    Util::ConvertHexToBytes(&tokenVal[1], keyID->getAddress().c_str(), 20);
+    Web3Util::ConvertHexToBytes(&tokenVal[1], keyID->getAddress().c_str(), 20);
     tokenVal[0] = 0x01;
     // Serial.println(keyID->getAddress().c_str());
     write(tokenVal, 21);

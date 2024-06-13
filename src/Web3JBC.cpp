@@ -3,18 +3,14 @@
 // Based on Web3E by James Brown.
 
 #include "Web3JBC.h"
-#include "Certificates.h"
-#include "Util.h"
+#include "Web3Util.h"
 #include "TagReader/TagReader.h"
 #include <iostream>
 #include <sstream>
-#include "nodes.h"
 
 Web3JBC::Web3JBC()
 {
-    infura_key = INFURA_API_KEY;
     mem = new BYTE[sizeof(WiFiClientSecure)];
-    chainId = 8899;
     selectHost();
 }
 
@@ -111,7 +107,7 @@ long long int Web3JBC::EthGasPrice()
 
 void Web3JBC::EthAccounts(char **array, int size)
 {
-    // TODO
+    // JBC not store account then do nothings
 }
 
 int Web3JBC::EthBlockNumber()
@@ -310,7 +306,7 @@ string Web3JBC::getString(const string *json)
         return string("");
     }
 
-    vector<string> *v = Util::ConvertStringHexToABIArray(&parseVal);
+    vector<string> *v = Web3Util::ConvertStringHexToABIArray(&parseVal);
 
     uint256_t length = uint256_t(v->at(1));
     uint32_t lengthIndex = length;
@@ -325,7 +321,7 @@ string Web3JBC::getString(const string *json)
     }
 
     // convert ascii into string
-    string text = Util::ConvertHexToASCII(asciiHex.substr(0, length * 2).c_str(), length * 2);
+    string text = Web3Util::ConvertHexToASCII(asciiHex.substr(0, length * 2).c_str(), length * 2);
     delete v;
 
     return text;
@@ -334,39 +330,16 @@ string Web3JBC::getString(const string *json)
 /**
  * @brief Fetch TLS certificate for the node
  *
- * TODO: Add remaining certificates as required
- *
- * @return const char*
+ * Force insecure mode because work fine
  */
 void Web3JBC::setupCert()
 {
-    const char *cert = getCertificate(chainId);
-    if (cert != NULL)
-    {
-        client->setCACert(cert);
-    }
-    else
-    {
-        client->setInsecure();
-    }
+    client->setInsecure();
 }
 
 void Web3JBC::selectHost()
 {
-    std::string node = getNode(chainId);
-
-    if (node.find("infura.io") != std::string::npos)
-    {
-        node += infura_key;
-    }
-
-    if (node.length() == 0)
-    {
-        Serial.print("ChainId: ");
-        Serial.print(chainId);
-        Serial.println("Is not yet supported, please add the RPC (and certificate if required) and submit a PR to the repo.");
-        return;
-    }
+    std::string node = JBC_RPC_URL;
 
     int ppos = node.find(":");
     if (ppos > 0)
@@ -394,5 +367,5 @@ void Web3JBC::selectHost()
 
 long long Web3JBC::getChainId() const
 {
-    return chainId;
+    return JBC_ID;
 }

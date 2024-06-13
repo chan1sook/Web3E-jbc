@@ -12,7 +12,8 @@ typedef unsigned char BYTE;
 #define ETHERS_KECCAK256_LENGTH 32
 #define ETHERS_SIGNATURE_LENGTH 65
 
-#define INFURA_API_KEY "a9d6b1764a464faaa8f0399958601361" // For production you will want to make your own API key, visit https://infura.io
+#define JBC_ID 8899
+#define JBC_RPC_URL "rpc-l1.jibchain.net"
 
 class Web3JBC;
 class Crypto;
@@ -25,10 +26,9 @@ class KeyID;
 #include <Contract.h>
 #include <Crypto.h>
 #include <KeyID.h>
-#include <Util.h>
+#include <Web3Util.h>
 #include <string.h>
 #include <string>
-#include "chainIds.h"
 
 using namespace std;
 
@@ -85,9 +85,7 @@ private:
     BYTE *mem;
     const char *host;
     const char *path;
-    const char *infura_key;
     unsigned short port;
-    long long chainId;
 };
 
 #endif // ARDUINO_WEB3_Web3JBC_H

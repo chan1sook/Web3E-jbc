@@ -1,6 +1,6 @@
 #######################################
 
-# Syntax Coloring Map For Web3
+# Syntax Coloring Map For Web3-JBC
 
 ####################################### 
 
@@ -11,7 +11,7 @@
 
 
 Web3JBC	KEYWORD1
-
+Web3Util KEYWORD1
 
 
 #######################################

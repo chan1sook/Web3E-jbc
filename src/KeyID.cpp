@@ -1,11 +1,11 @@
 #include <KeyID.h>
-#include "Util.h"
+#include "Web3Util.h"
 
 // If we already have a private key
 KeyID::KeyID(Web3JBC *web3, const std::string &privateKey)
 {
   privateKeyBytes = new BYTE[ETHERS_PRIVATEKEY_LENGTH];
-  Util::ConvertHexToBytes(privateKeyBytes, privateKey.c_str(), ETHERS_PRIVATEKEY_LENGTH);
+  Web3Util::ConvertHexToBytes(privateKeyBytes, privateKey.c_str(), ETHERS_PRIVATEKEY_LENGTH);
   initPrivateKey(privateKey, web3);
 }
 
@@ -33,7 +33,7 @@ KeyID::KeyID(Web3JBC *web3)
       privateKeyBytes[i] = byte(EEPROM.read(i + 1));
     }
 
-    privateKey = Util::ConvertBytesToHex(privateKeyBytes, ETHERS_PRIVATEKEY_LENGTH);
+    privateKey = Web3Util::ConvertBytesToHex(privateKeyBytes, ETHERS_PRIVATEKEY_LENGTH);
 
     if (privateKey[1] == 'x')
       privateKey.substr(2);
@@ -50,7 +50,7 @@ void KeyID::generatePrivateKey(Web3JBC *web3)
 {
   random_buffer(privateKeyBytes, ETHERS_PRIVATEKEY_LENGTH);
 
-  std::string privateKey = Util::ConvertBytesToHex(privateKeyBytes, ETHERS_PRIVATEKEY_LENGTH);
+  std::string privateKey = Web3Util::ConvertBytesToHex(privateKeyBytes, ETHERS_PRIVATEKEY_LENGTH);
 
   EEPROM.write(0, 64);
   for (int i = 0; i < ETHERS_PRIVATEKEY_LENGTH; i++)
@@ -72,10 +72,10 @@ void KeyID::getSignature(uint8_t *signature, BYTE *msgBytes, int length)
 
   Crypto::Keccak256((uint8_t *)msgBytes, length, hash);
   Serial.print("Got Hash: ");
-  Serial.println(Util::ConvertBytesToHex(hash, ETHERS_KECCAK256_LENGTH).c_str());
+  Serial.println(Web3Util::ConvertBytesToHex(hash, ETHERS_KECCAK256_LENGTH).c_str());
   crypto->Sign(hash, signature);
   Serial.print("Got Sig: ");
-  Serial.println(Util::ConvertBytesToHex(signature, ETHERS_SIGNATURE_LENGTH).c_str());
+  Serial.println(Web3Util::ConvertBytesToHex(signature, ETHERS_SIGNATURE_LENGTH).c_str());
 }
 
 void KeyID::initPrivateKey(const std::string &privateKey, Web3JBC *web3)
@@ -93,6 +93,6 @@ const std::string KeyID::getAddress()
   BYTE publicKey[ETHERS_PUBLICKEY_LENGTH];
   Crypto::PrivateKeyToPublic(privateKeyBytes, publicKey);
   Crypto::PublicKeyToAddress(publicKey, ethAddressBytes);
-  std::string address = Util::ConvertBytesToHex(ethAddressBytes, ETHERS_ADDRESS_LENGTH);
+  std::string address = Web3Util::ConvertBytesToHex(ethAddressBytes, ETHERS_ADDRESS_LENGTH);
   return address;
 }

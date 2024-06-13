@@ -1,6 +1,6 @@
 #include "UdpBridge.h"
 #include "Web3JBC.h"
-#include "Util.h"
+#include "Web3Util.h"
 #include "KeyID.h"
 
 // Bridge defaults - override these with setupConnection

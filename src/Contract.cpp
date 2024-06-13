@@ -10,7 +10,7 @@
 #include "Contract.h"
 #include "Web3JBC.h"
 #include <WiFi.h>
-#include "Util.h"
+#include "Web3Util.h"
 #include <vector>
 
 #define SIGNATURE_LENGTH 64
@@ -188,7 +188,7 @@ string Contract::SendTransaction(uint32_t nonceVal, unsigned long long gasPriceV
                                                        toStr, valueStr, dataStr,
                                                        signature, recid[0]);
 
-    string paramStr = Util::VectorToString(&param);
+    string paramStr = Web3Util::VectorToString(&param);
     return web3->EthSendSignedTransaction(&paramStr, param.size());
 }
 
@@ -207,7 +207,7 @@ Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uin
     vector<uint8_t> param = RlpEncodeForRawTransaction(nonceVal, gasPriceVal, gasLimitVal,
                                                        toStr, valueStr, dataStr,
                                                        signature, recid[0]);
-    return Util::VectorToString(&param);
+    return Web3Util::VectorToString(&param);
 }
 
 /**
@@ -228,12 +228,12 @@ void Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceV
 {
     vector<uint8_t> encoded = RlpEncode(nonceVal, gasPriceVal, gasLimitVal, toStr, valueStr, dataStr);
     // hash
-    string t = Util::VectorToString(&encoded);
+    string t = Web3Util::VectorToString(&encoded);
 
     uint8_t *hash = new uint8_t[ETHERS_KECCAK256_LENGTH];
     size_t encodedTxBytesLength = (t.length() - 2) / 2;
     uint8_t *bytes = new uint8_t[encodedTxBytesLength];
-    Util::ConvertHexToBytes(bytes, t.c_str(), encodedTxBytesLength);
+    Web3Util::ConvertHexToBytes(bytes, t.c_str(), encodedTxBytesLength);
 
     Crypto::Keccak256((uint8_t *)bytes, encodedTxBytesLength, hash);
 
@@ -243,9 +243,9 @@ void Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceV
 
 std::string Contract::GenerateContractBytes(const char *func)
 {
-    std::string in = Util::ConvertBytesToHex((const uint8_t *)func, strlen(func));
+    std::string in = Web3Util::ConvertBytesToHex((const uint8_t *)func, strlen(func));
     // get the hash of the input
-    std::vector<uint8_t> contractBytes = Util::ConvertHexToVector(&in);
+    std::vector<uint8_t> contractBytes = Web3Util::ConvertHexToVector(&in);
     std::string out = Crypto::Keccak256(&contractBytes);
     out.resize(10);
     return out;
@@ -254,12 +254,12 @@ std::string Contract::GenerateContractBytes(const char *func)
 string Contract::GenerateBytesForUint(const uint256_t *value)
 {
     std::vector<uint8_t> bits = value->export_bits();
-    return Util::PlainVectorToString(&bits);
+    return Web3Util::PlainVectorToString(&bits);
 }
 
 string Contract::GenerateBytesForInt(const int32_t value)
 {
-    return string(56, '0') + Util::ConvertIntegerToBytes(value);
+    return string(56, '0') + Web3Util::ConvertIntegerToBytes(value);
 }
 
 string Contract::GenerateBytesForUIntArray(const vector<uint32_t> *v)
@@ -301,7 +301,7 @@ string Contract::GenerateBytesForHexBytes(const string *value)
         cleaned = value->substr(1);
     else if (value->at(1) == 'x')
         cleaned = value->substr(2);
-    string digitsStr = Util::intToHex(cleaned.length() / 2); // bytes length will be hex length / 2
+    string digitsStr = Web3Util::intToHex(cleaned.length() / 2); // bytes length will be hex length / 2
     string lengthDesignator = string(64 - digitsStr.length(), '0') + digitsStr;
     cleaned = lengthDesignator + cleaned;
     size_t digits = cleaned.length() % 64;
@@ -322,7 +322,7 @@ string Contract::GenerateBytesForStruct(const string *value)
 
 string Contract::GenerateBytesForBytes(const char *value, const int len)
 {
-    string bytesStr = Util::ConvertBytesToHex((const uint8_t *)value, len).substr(2); // clean hex prefix;
+    string bytesStr = Web3Util::ConvertBytesToHex((const uint8_t *)value, len).substr(2); // clean hex prefix;
     size_t digits = bytesStr.length() % 64;
     return bytesStr + (digits > 0 ? string(64 - digits, '0') : "");
 }
@@ -331,27 +331,27 @@ vector<uint8_t> Contract::RlpEncode(
     uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
     string *toStr, uint256_t *val, string *dataStr)
 {
-    vector<uint8_t> nonce = Util::ConvertNumberToVector(nonceVal);
-    vector<uint8_t> gasPrice = Util::ConvertNumberToVector(gasPriceVal);
-    vector<uint8_t> gasLimit = Util::ConvertNumberToVector(gasLimitVal);
-    vector<uint8_t> to = Util::ConvertHexToVector(toStr);
+    vector<uint8_t> nonce = Web3Util::ConvertNumberToVector(nonceVal);
+    vector<uint8_t> gasPrice = Web3Util::ConvertNumberToVector(gasPriceVal);
+    vector<uint8_t> gasLimit = Web3Util::ConvertNumberToVector(gasLimitVal);
+    vector<uint8_t> to = Web3Util::ConvertHexToVector(toStr);
     vector<uint8_t> value = val->export_bits_truncate();
-    vector<uint8_t> data = Util::ConvertHexToVector(dataStr);
-    vector<uint8_t> chainId = Util::ConvertNumberToVector(uint64_t(web3->getChainId()));
+    vector<uint8_t> data = Web3Util::ConvertHexToVector(dataStr);
+    vector<uint8_t> chainId = Web3Util::ConvertNumberToVector(uint64_t(web3->getChainId()));
 
     auto *zeroStr = new string("0");
-    vector<uint8_t> zero = Util::ConvertHexToVector(zeroStr);
-    vector<uint8_t> outputNonce = Util::RlpEncodeItemWithVector(nonce);
-    vector<uint8_t> outputGasPrice = Util::RlpEncodeItemWithVector(gasPrice);
-    vector<uint8_t> outputGasLimit = Util::RlpEncodeItemWithVector(gasLimit);
-    vector<uint8_t> outputTo = Util::RlpEncodeItemWithVector(to);
-    vector<uint8_t> outputValue = Util::RlpEncodeItemWithVector(value);
-    vector<uint8_t> outputData = Util::RlpEncodeItemWithVector(data);
+    vector<uint8_t> zero = Web3Util::ConvertHexToVector(zeroStr);
+    vector<uint8_t> outputNonce = Web3Util::RlpEncodeItemWithVector(nonce);
+    vector<uint8_t> outputGasPrice = Web3Util::RlpEncodeItemWithVector(gasPrice);
+    vector<uint8_t> outputGasLimit = Web3Util::RlpEncodeItemWithVector(gasLimit);
+    vector<uint8_t> outputTo = Web3Util::RlpEncodeItemWithVector(to);
+    vector<uint8_t> outputValue = Web3Util::RlpEncodeItemWithVector(value);
+    vector<uint8_t> outputData = Web3Util::RlpEncodeItemWithVector(data);
 
-    vector<uint8_t> outputChainId = Util::RlpEncodeItemWithVector(chainId);
-    vector<uint8_t> outputZero = Util::RlpEncodeItemWithVector(zero);
+    vector<uint8_t> outputChainId = Web3Util::RlpEncodeItemWithVector(chainId);
+    vector<uint8_t> outputZero = Web3Util::RlpEncodeItemWithVector(zero);
 
-    vector<uint8_t> encoded = Util::RlpEncodeWholeHeaderWithVector(
+    vector<uint8_t> encoded = Web3Util::RlpEncodeWholeHeaderWithVector(
         outputNonce.size() +
         outputGasPrice.size() +
         outputGasLimit.size() +
@@ -394,19 +394,19 @@ vector<uint8_t> Contract::RlpEncodeForRawTransaction(
     {
         signature.push_back(sig[i]);
     }
-    vector<uint8_t> nonce = Util::ConvertNumberToVector(nonceVal);
-    vector<uint8_t> gasPrice = Util::ConvertNumberToVector(gasPriceVal);
-    vector<uint8_t> gasLimit = Util::ConvertNumberToVector(gasLimitVal);
-    vector<uint8_t> to = Util::ConvertHexToVector(toStr);
+    vector<uint8_t> nonce = Web3Util::ConvertNumberToVector(nonceVal);
+    vector<uint8_t> gasPrice = Web3Util::ConvertNumberToVector(gasPriceVal);
+    vector<uint8_t> gasLimit = Web3Util::ConvertNumberToVector(gasLimitVal);
+    vector<uint8_t> to = Web3Util::ConvertHexToVector(toStr);
     vector<uint8_t> value = val->export_bits_truncate();
-    vector<uint8_t> data = Util::ConvertHexToVector(dataStr);
+    vector<uint8_t> data = Web3Util::ConvertHexToVector(dataStr);
 
-    vector<uint8_t> outputNonce = Util::RlpEncodeItemWithVector(nonce);
-    vector<uint8_t> outputGasPrice = Util::RlpEncodeItemWithVector(gasPrice);
-    vector<uint8_t> outputGasLimit = Util::RlpEncodeItemWithVector(gasLimit);
-    vector<uint8_t> outputTo = Util::RlpEncodeItemWithVector(to);
-    vector<uint8_t> outputValue = Util::RlpEncodeItemWithVector(value);
-    vector<uint8_t> outputData = Util::RlpEncodeItemWithVector(data);
+    vector<uint8_t> outputNonce = Web3Util::RlpEncodeItemWithVector(nonce);
+    vector<uint8_t> outputGasPrice = Web3Util::RlpEncodeItemWithVector(gasPrice);
+    vector<uint8_t> outputGasLimit = Web3Util::RlpEncodeItemWithVector(gasLimit);
+    vector<uint8_t> outputTo = Web3Util::RlpEncodeItemWithVector(to);
+    vector<uint8_t> outputValue = Web3Util::RlpEncodeItemWithVector(value);
+    vector<uint8_t> outputData = Web3Util::RlpEncodeItemWithVector(data);
 
     vector<uint8_t> R;
     R.insert(R.end(), signature.begin(), signature.begin() + (SIGNATURE_LENGTH / 2));
@@ -415,10 +415,10 @@ vector<uint8_t> Contract::RlpEncodeForRawTransaction(
     // V.push_back((uint8_t)(recid + web3->getChainId() * 2 + 35)); // according to EIP-155
     uint256_t vv = recid + (web3->getChainId() * 2) + 35; // EIP-155 ensure long chainIds work correctly
     vector<uint8_t> V = vv.export_bits_truncate();        // convert to bytes
-    vector<uint8_t> outputR = Util::RlpEncodeItemWithVector(R);
-    vector<uint8_t> outputS = Util::RlpEncodeItemWithVector(S);
-    vector<uint8_t> outputV = Util::RlpEncodeItemWithVector(V);
-    vector<uint8_t> encoded = Util::RlpEncodeWholeHeaderWithVector(
+    vector<uint8_t> outputR = Web3Util::RlpEncodeItemWithVector(R);
+    vector<uint8_t> outputS = Web3Util::RlpEncodeItemWithVector(S);
+    vector<uint8_t> outputV = Web3Util::RlpEncodeItemWithVector(V);
+    vector<uint8_t> encoded = Web3Util::RlpEncodeWholeHeaderWithVector(
         outputNonce.size() +
         outputGasPrice.size() +
         outputGasLimit.size() +

@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include "Crypto.h"
 #include "Web3JBC.h"
-#include "Util.h"
+#include "Web3Util.h"
 #include "Trezor/secp256k1.h"
 #include "Trezor/ecdsa.h"
 #include <vector>
@@ -47,7 +47,7 @@ bool Crypto::Sign(BYTE *digest, BYTE *result)
 
 void Crypto::SetPrivateKey(const char *key)
 {
-    Util::ConvertHexToBytes(privateKey, key, ETHERS_PRIVATEKEY_LENGTH);
+    Web3Util::ConvertHexToBytes(privateKey, key, ETHERS_PRIVATEKEY_LENGTH);
 }
 
 void Crypto::ECRecover(BYTE *signature, BYTE *public_key, BYTE *message_hash)
@@ -103,14 +103,14 @@ string Crypto::Keccak256(vector<uint8_t> *bytes)
     for (int i = 0; i < ETHERS_KECCAK256_LENGTH; i++)
         resultVector.push_back(result[i]);
 
-    return Util::VectorToString(&resultVector);
+    return Web3Util::VectorToString(&resultVector);
 }
 
 string Crypto::ECRecoverFromHexMessage(string *signature, string *message)
 {
     uint8_t challengeHash[ETHERS_KECCAK256_LENGTH];
     // convert hex to bytes
-    vector<uint8_t> messageBytes = Util::ConvertHexToVector((uint8_t *)(message->c_str()));
+    vector<uint8_t> messageBytes = Web3Util::ConvertHexToVector((uint8_t *)(message->c_str()));
     // hash the full challenge
     Crypto::Keccak256((uint8_t *)messageBytes.data(), messageBytes.size(), challengeHash);
     return ECRecoverFromHash(signature, challengeHash);
@@ -122,7 +122,7 @@ string Crypto::ECRecoverFromHash(string *signature, BYTE *digest)
     BYTE signatureBytes[ETHERS_SIGNATURE_LENGTH];
     BYTE publicKeyBytes[ETHERS_PUBLICKEY_LENGTH];
 
-    Util::ConvertHexToBytes(signatureBytes, signature->c_str(), ETHERS_SIGNATURE_LENGTH);
+    Web3Util::ConvertHexToBytes(signatureBytes, signature->c_str(), ETHERS_SIGNATURE_LENGTH);
 
     // Perform ECRecover to get the public key - this extracts the public key of the private key
     // that was used to sign the message - that is, the private key held by the wallet/metamask
@@ -131,7 +131,7 @@ string Crypto::ECRecoverFromHash(string *signature, BYTE *digest)
     BYTE recoverAddr[ETHERS_ADDRESS_LENGTH];
     // Now reduce the recovered public key to Ethereum address
     Crypto::PublicKeyToAddress(publicKeyBytes, recoverAddr);
-    string recoveredAddress = Util::ConvertBytesToHex(recoverAddr, ETHERS_ADDRESS_LENGTH);
+    string recoveredAddress = Web3Util::ConvertBytesToHex(recoverAddr, ETHERS_ADDRESS_LENGTH);
     return recoveredAddress;
 }
 
@@ -139,7 +139,7 @@ string Crypto::ECRecoverFromPersonalMessage(string *signature, string *message)
 {
     uint8_t challengeHash[ETHERS_KECCAK256_LENGTH];
     string challengeStr = PERSONAL_MESSAGE_PREFIX;
-    challengeStr += Util::toString((int)message->length());
+    challengeStr += Web3Util::toString((int)message->length());
     challengeStr += *message;
 
     Crypto::Keccak256((uint8_t *)challengeStr.c_str(), challengeStr.length(), challengeHash);
