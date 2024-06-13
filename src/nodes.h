@@ -40,7 +40,7 @@
 #define KLAYTN_BAOBAB_RPC "api.baobab.klaytn.net:8651"
 #define FUJI_TEST_RPC "api.avax-test.network/ext/bc/C/rpc"
 
-const char* getNode(long long chainId)
+const char *getNode(long long chainId)
 {
     switch (chainId)
     {
@@ -90,9 +90,11 @@ const char* getNode(long long chainId)
         return OPTIMISM_INF_GOERLI_URL;
     case ARBITRUM_GOERLI_ID:
         return ARBITRUM_INF_GOERLI_URL;
-	case FUJI_TEST_ID:
+    case FUJI_TEST_ID:
         return FUJI_TEST_RPC;
-		
+    case 8899:
+        return "rpc-l1.jibchain.net";
+
     default:
         return "";
     }

@@ -1,7 +1,7 @@
 {
-    "description": "Web3E (Ethereum Embedded) interface for devices running Arduino with easy to use TokenScript/SmartLayer integration. Link your tokens/NFTs to devices securely.", 
+    "description": "A fork from Web3E(https://github.com/AlphaWallet/Web3E) for JBC Chain", 
     "repository": {
-        "url": "https://github.com/AlphaWallet/Web3E", 
+        "url": "https://github.com/chan1sook/Web3E-jbc", 
         "type": "git"
     }, 
     "platforms": [ 
@@ -10,15 +10,16 @@
     "authors": [
         {
             "maintainer": true, 
-            "name": "James Brown", 
-            "url": "https://github.com/JamesSmartCell", 
-            "email": "j@smarttokenlabs.com"
+            "name": "Natthawat Racocharoensinp", 
+            "url": "https://github.com/chan1sook", 
+            "email": "chan1sook@hotmail.com"
         }
     ], 
     "frameworks": "arduino",
     "keywords": [
         "Web3",
         "Web3E",
+        "JBC",
         "Ethereum",
         "Blockchain",
         "Token",
@@ -26,11 +27,8 @@
         "SmartLayer",
         "DApp",
         "NFT",
-        "TokenScript",
-		"AlphaWallet",
 		"Smart Tokens"
     ],
-    "name": "Web3E", 
-    "version": "1.44", 
-    "homepage": "https://www.smarttokenlabs.com/"
+    "name": "Web3E JBC", 
+    "version": "0.0.1"
 }
