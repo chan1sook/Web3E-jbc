@@ -1,14 +1,9 @@
-// Web3E main header
-//
-// By James Brown Githubs: @JamesSmartCell @AlphaWallet
-// Twitters: @TallyDigital @AlphaWallet
-//
-// Based on Web3 Arduino by Okada, Takahiro.
-//
-//
+// Web3E JBC
+// by Natthawat Raocharoensinp (chan1sook)
+// Based on Web3E by James Brown.
 
-#ifndef ARDUINO_WEB3_WEB3_H
-#define ARDUINO_WEB3_WEB3_H
+#ifndef ARDUINO_WEB3_WEB3JBC_H
+#define ARDUINO_WEB3_WEB3JBC_H
 
 typedef unsigned char BYTE;
 #define ETHERS_PRIVATEKEY_LENGTH 32
@@ -19,7 +14,7 @@ typedef unsigned char BYTE;
 
 #define INFURA_API_KEY "a9d6b1764a464faaa8f0399958601361" // For production you will want to make your own API key, visit https://infura.io
 
-class Web3;
+class Web3JBC;
 class Crypto;
 class KeyID;
 
@@ -45,10 +40,10 @@ enum ConnectionStage
     confirmed
 };
 
-class Web3
+class Web3JBC
 {
 public:
-    Web3();
+    Web3JBC();
     string Web3ClientVersion();
     string Web3Sha3(const string *data);
     int NetVersion();
@@ -95,4 +90,4 @@ private:
     long long chainId;
 };
 
-#endif // ARDUINO_WEB3_WEB3_H
+#endif // ARDUINO_WEB3_Web3JBC_H

@@ -1,12 +1,12 @@
 #ifndef TCP_BRIDGE_H
 #define TCP_BRIDGE_H
 #include <APIReturn.h>
-#include <Web3.h>
+#include <Web3JBC.h>
 #include <WiFi.h>
 #include <string>
 
 class TcpBridge;
-//Format for API handler is void YourAPIHandler(APIReturn *apiReturn, UdpBridge *client, int methodId) { ... }
+// Format for API handler is void YourAPIHandler(APIReturn *apiReturn, UdpBridge *client, int methodId) { ... }
 typedef std::string (*TcpBridgeCallback)(APIReturn *);
 
 class TcpBridge : public WiFiClient
@@ -14,7 +14,7 @@ class TcpBridge : public WiFiClient
 public:
     TcpBridge();
     void startConnection();
-    void setKey(KeyID *keyId, Web3 *w3);
+    void setKey(KeyID *keyId, Web3JBC *w3);
     void checkClientAPI(TcpBridgeCallback callback);
 
     int getConnectionStatus() { return connectionValidCountdown; }
@@ -34,9 +34,9 @@ private:
     inline boolean isNewSession();
     void sendPing();
     void sendResponse(std::string resp);
-    int  getArgLen(int &index);
+    int getArgLen(int &index);
 
-    Web3 *web3;
+    Web3JBC *web3;
     KeyID *keyID;
     APIReturn *apiReturn;
 

@@ -1,10 +1,8 @@
 // Web3E JBC
 // by Natthawat Raocharoensinp (chan1sook)
 // Based on Web3E by James Brown.
-//
-//
 
-#include "Web3.h"
+#include "Web3JBC.h"
 #include "Certificates.h"
 #include "Util.h"
 #include "TagReader/TagReader.h"
@@ -12,7 +10,7 @@
 #include <sstream>
 #include "nodes.h"
 
-Web3::Web3()
+Web3JBC::Web3JBC()
 {
     infura_key = INFURA_API_KEY;
     mem = new BYTE[sizeof(WiFiClientSecure)];
@@ -20,7 +18,7 @@ Web3::Web3()
     selectHost();
 }
 
-string Web3::Web3ClientVersion()
+string Web3JBC::Web3ClientVersion()
 {
     string m = "web3_clientVersion";
     string p = "[]";
@@ -29,7 +27,7 @@ string Web3::Web3ClientVersion()
     return getString(&output);
 }
 
-string Web3::Web3Sha3(const string *data)
+string Web3JBC::Web3Sha3(const string *data)
 {
     string m = "web3_sha3";
     string p = "[\"" + *data + "\"]";
@@ -38,7 +36,7 @@ string Web3::Web3Sha3(const string *data)
     return getString(&output);
 }
 
-int Web3::NetVersion()
+int Web3JBC::NetVersion()
 {
     string m = "net_version";
     string p = "[]";
@@ -47,7 +45,7 @@ int Web3::NetVersion()
     return getInt(&output);
 }
 
-bool Web3::NetListening()
+bool Web3JBC::NetListening()
 {
     string m = "net_listening";
     string p = "[]";
@@ -56,7 +54,7 @@ bool Web3::NetListening()
     return getBool(&output);
 }
 
-int Web3::NetPeerCount()
+int Web3JBC::NetPeerCount()
 {
     string m = "net_peerCount";
     string p = "[]";
@@ -65,7 +63,7 @@ int Web3::NetPeerCount()
     return getInt(&output);
 }
 
-double Web3::EthProtocolVersion()
+double Web3JBC::EthProtocolVersion()
 {
     string m = "eth_protocolVersion";
     string p = "[]";
@@ -74,7 +72,7 @@ double Web3::EthProtocolVersion()
     return getDouble(&output);
 }
 
-bool Web3::EthSyncing()
+bool Web3JBC::EthSyncing()
 {
     string m = "eth_syncing";
     string p = "[]";
@@ -84,7 +82,7 @@ bool Web3::EthSyncing()
     return getBool(&result);
 }
 
-bool Web3::EthMining()
+bool Web3JBC::EthMining()
 {
     string m = "eth_mining";
     string p = "[]";
@@ -93,7 +91,7 @@ bool Web3::EthMining()
     return getBool(&output);
 }
 
-double Web3::EthHashrate()
+double Web3JBC::EthHashrate()
 {
     string m = "eth_hashrate";
     string p = "[]";
@@ -102,7 +100,7 @@ double Web3::EthHashrate()
     return getDouble(&output);
 }
 
-long long int Web3::EthGasPrice()
+long long int Web3JBC::EthGasPrice()
 {
     string m = "eth_gasPrice";
     string p = "[]";
@@ -111,12 +109,12 @@ long long int Web3::EthGasPrice()
     return getLongLong(&output);
 }
 
-void Web3::EthAccounts(char **array, int size)
+void Web3JBC::EthAccounts(char **array, int size)
 {
     // TODO
 }
 
-int Web3::EthBlockNumber()
+int Web3JBC::EthBlockNumber()
 {
     string m = "eth_blockNumber";
     string p = "[]";
@@ -125,7 +123,7 @@ int Web3::EthBlockNumber()
     return getInt(&output);
 }
 
-uint256_t Web3::EthGetBalance(const string *address)
+uint256_t Web3JBC::EthGetBalance(const string *address)
 {
     string m = "eth_getBalance";
     string p = "[\"" + *address + "\",\"latest\"]";
@@ -134,7 +132,7 @@ uint256_t Web3::EthGetBalance(const string *address)
     return getUint256(&output);
 }
 
-string Web3::EthViewCall(const string *data, const char *to)
+string Web3JBC::EthViewCall(const string *data, const char *to)
 {
     string m = "eth_call";
     string p = "[{\"data\":\""; // + *data;
@@ -146,7 +144,7 @@ string Web3::EthViewCall(const string *data, const char *to)
     return exec(&input);
 }
 
-int Web3::EthGetTransactionCount(const string *address)
+int Web3JBC::EthGetTransactionCount(const string *address)
 {
     string m = "eth_getTransactionCount";
     string p = "[\"" + *address + "\",\"pending\"]"; // in case we need to push several transactions in a row
@@ -155,8 +153,8 @@ int Web3::EthGetTransactionCount(const string *address)
     return getInt(&output);
 }
 
-string Web3::EthCall(const string *from, const char *to, long gas, long gasPrice,
-                     const string *value, const string *data)
+string Web3JBC::EthCall(const string *from, const char *to, long gas, long gasPrice,
+                        const string *value, const string *data)
 {
     // TODO use gas, gasprice and value
     string m = "eth_call";
@@ -165,7 +163,7 @@ string Web3::EthCall(const string *from, const char *to, long gas, long gasPrice
     return exec(&input);
 }
 
-string Web3::EthSendSignedTransaction(const string *data, const uint32_t dataLen)
+string Web3JBC::EthSendSignedTransaction(const string *data, const uint32_t dataLen)
 {
     string m = "eth_sendRawTransaction";
     string p = "[\"" + *data + "\"]";
@@ -179,12 +177,12 @@ string Web3::EthSendSignedTransaction(const string *data, const uint32_t dataLen
 // -------------------------------
 // Private
 
-string Web3::generateJson(const string *method, const string *params)
+string Web3JBC::generateJson(const string *method, const string *params)
 {
     return "{\"jsonrpc\":\"2.0\",\"method\":\"" + *method + "\",\"params\":" + *params + ",\"id\":0}";
 }
 
-string Web3::exec(const string *data)
+string Web3JBC::exec(const string *data)
 {
     string result;
 
@@ -243,42 +241,42 @@ string Web3::exec(const string *data)
     return result;
 }
 
-int Web3::getInt(const string *json)
+int Web3JBC::getInt(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
     return strtol(parseVal.c_str(), nullptr, 16);
 }
 
-long Web3::getLong(const string *json)
+long Web3JBC::getLong(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
     return strtol(parseVal.c_str(), nullptr, 16);
 }
 
-long long int Web3::getLongLong(const string *json)
+long long int Web3JBC::getLongLong(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
     return strtoll(parseVal.c_str(), nullptr, 16);
 }
 
-uint256_t Web3::getUint256(const string *json)
+uint256_t Web3JBC::getUint256(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
     return uint256_t(parseVal.c_str());
 }
 
-double Web3::getDouble(const string *json)
+double Web3JBC::getDouble(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
     return strtof(parseVal.c_str(), nullptr);
 }
 
-bool Web3::getBool(const string *json)
+bool Web3JBC::getBool(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
@@ -286,7 +284,7 @@ bool Web3::getBool(const string *json)
     return v > 0;
 }
 
-string Web3::getResult(const string *json)
+string Web3JBC::getResult(const string *json)
 {
     TagReader reader;
     string res = reader.getTag(json, "result");
@@ -303,7 +301,7 @@ string Web3::getResult(const string *json)
 }
 
 // Currently only works for string return eg: function name() returns (string)
-string Web3::getString(const string *json)
+string Web3JBC::getString(const string *json)
 {
     TagReader reader;
     string parseVal = reader.getTag(json, "result");
@@ -340,7 +338,7 @@ string Web3::getString(const string *json)
  *
  * @return const char*
  */
-void Web3::setupCert()
+void Web3JBC::setupCert()
 {
     const char *cert = getCertificate(chainId);
     if (cert != NULL)
@@ -353,7 +351,7 @@ void Web3::setupCert()
     }
 }
 
-void Web3::selectHost()
+void Web3JBC::selectHost()
 {
     std::string node = getNode(chainId);
 
@@ -394,7 +392,7 @@ void Web3::selectHost()
     }
 }
 
-long long Web3::getChainId() const
+long long Web3JBC::getChainId() const
 {
     return chainId;
 }

@@ -8,7 +8,7 @@
 //
 
 #include "Contract.h"
-#include "Web3.h"
+#include "Web3JBC.h"
 #include <WiFi.h>
 #include "Util.h"
 #include <vector>
@@ -19,24 +19,26 @@
  * Public functions
  * */
 
-Contract::Contract(Web3* _web3, const char* address) {
+Contract::Contract(Web3JBC *_web3, const char *address)
+{
     web3 = _web3;
     contractAddress = address;
-    options.gas=0;
-    strcpy(options.from,"");
-    strcpy(options.to,"");
-    strcpy(options.gasPrice,"0");
+    options.gas = 0;
+    strcpy(options.from, "");
+    strcpy(options.to, "");
+    strcpy(options.gasPrice, "0");
     crypto = NULL;
 }
 
-Contract::Contract(long long networkId) : Contract(new Web3(networkId), "") {}
+Contract::Contract(long long networkId) : Contract(new Web3JBC(networkId), "") {}
 
-void Contract::SetPrivateKey(const char *key) {
+void Contract::SetPrivateKey(const char *key)
+{
     crypto = new Crypto(web3);
     crypto->SetPrivateKey(key);
 }
 
-string Contract::SetupContractData(const char* func, ...)
+string Contract::SetupContractData(const char *func, ...)
 {
     string ret = "";
 
@@ -53,11 +55,13 @@ string Contract::SetupContractData(const char* func, ...)
     p = strtok(0, "(");
     p = strtok(p, ")");
     p = strtok(p, ",");
-    if (p != 0) {
+    if (p != 0)
+    {
         params.push_back(string(p));
         paramCount++;
     }
-    while(p != 0) {
+    while (p != 0)
+    {
         p = strtok(0, ",");
         if (p != 0)
         {
@@ -72,7 +76,8 @@ string Contract::SetupContractData(const char* func, ...)
 
     va_list args;
     va_start(args, func);
-    for( int i = 0; i < paramCount; ++i ) {
+    for (int i = 0; i < paramCount; ++i)
+    {
         if (strstr(params[i].c_str(), "uint") != NULL && strstr(params[i].c_str(), "[]") != NULL)
         {
             // value array
@@ -109,14 +114,14 @@ string Contract::SetupContractData(const char* func, ...)
             isDynamic.push_back(true);
             dynamicStartPointer += 0x20;
         }
-        else if (strncmp(params[i].c_str(), "bytes", sizeof("bytes")) == 0) //if sending bytes, take the value in hex
+        else if (strncmp(params[i].c_str(), "bytes", sizeof("bytes")) == 0) // if sending bytes, take the value in hex
         {
             string output = GenerateBytesForHexBytes(va_arg(args, string *));
             abiBlocks.push_back(output);
             isDynamic.push_back(true);
             dynamicStartPointer += 0x20;
         }
-        else if (strncmp(params[i].c_str(), "struct", sizeof("struct")) == 0) //if sending bytes, take the value in hex
+        else if (strncmp(params[i].c_str(), "struct", sizeof("struct")) == 0) // if sending bytes, take the value in hex
         {
             string output = GenerateBytesForStruct(va_arg(args, string *));
             abiBlocks.push_back(output);
@@ -127,8 +132,8 @@ string Contract::SetupContractData(const char* func, ...)
     va_end(args);
 
     uint256_t abiOffet = uint256_t(dynamicStartPointer);
-    //now build output - parse 1, standard params
-    for( int i = 0; i < paramCount; ++i ) 
+    // now build output - parse 1, standard params
+    for (int i = 0; i < paramCount; ++i)
     {
         if (isDynamic[i])
         {
@@ -142,8 +147,8 @@ string Contract::SetupContractData(const char* func, ...)
         }
     }
 
-    //parse 2: add dynamic params
-    for( int i = 0; i < paramCount; ++i ) 
+    // parse 2: add dynamic params
+    for (int i = 0; i < paramCount; ++i)
     {
         if (isDynamic[i])
         {
@@ -189,7 +194,8 @@ string Contract::SendTransaction(uint32_t nonceVal, unsigned long long gasPriceV
 
 string
 Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal, string *toStr,
-                          uint256_t *valueStr, string *dataStr) {
+                          uint256_t *valueStr, string *dataStr)
+{
 
     uint8_t signature[SIGNATURE_LENGTH];
     memset(signature, 0, SIGNATURE_LENGTH);
@@ -208,7 +214,7 @@ Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uin
  * Utility functions
  **/
 
-void Contract::ReplaceFunction(std::string &param, const char* func)
+void Contract::ReplaceFunction(std::string &param, const char *func)
 {
     param = GenerateContractBytes(func) + param.substr(10);
 }
@@ -225,11 +231,11 @@ void Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceV
     string t = Util::VectorToString(&encoded);
 
     uint8_t *hash = new uint8_t[ETHERS_KECCAK256_LENGTH];
-    size_t encodedTxBytesLength = (t.length()-2)/2;
+    size_t encodedTxBytesLength = (t.length() - 2) / 2;
     uint8_t *bytes = new uint8_t[encodedTxBytesLength];
     Util::ConvertHexToBytes(bytes, t.c_str(), encodedTxBytesLength);
 
-    Crypto::Keccak256((uint8_t*)bytes, encodedTxBytesLength, hash);
+    Crypto::Keccak256((uint8_t *)bytes, encodedTxBytesLength, hash);
 
     // sign
     Sign((uint8_t *)hash, signature, recid);
@@ -238,7 +244,7 @@ void Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceV
 std::string Contract::GenerateContractBytes(const char *func)
 {
     std::string in = Util::ConvertBytesToHex((const uint8_t *)func, strlen(func));
-    //get the hash of the input
+    // get the hash of the input
     std::vector<uint8_t> contractBytes = Util::ConvertHexToVector(&in);
     std::string out = Crypto::Keccak256(&contractBytes);
     out.resize(10);
@@ -259,7 +265,7 @@ string Contract::GenerateBytesForInt(const int32_t value)
 string Contract::GenerateBytesForUIntArray(const vector<uint32_t> *v)
 {
     string dynamicMarker = std::string(64, '0');
-    dynamicMarker.at(62) = '4'; //0x000...40 Array Designator
+    dynamicMarker.at(62) = '4'; // 0x000...40 Array Designator
     string arraySize = GenerateBytesForInt(v->size());
     string output = dynamicMarker + arraySize;
     for (auto itr = v->begin(); itr != v->end(); itr++)
@@ -273,15 +279,17 @@ string Contract::GenerateBytesForUIntArray(const vector<uint32_t> *v)
 string Contract::GenerateBytesForAddress(const string *v)
 {
     string cleaned = *v;
-    if (v->at(0) == 'x') cleaned = v->substr(1);
-    else if (v->at(1) == 'x') cleaned = v->substr(2);
+    if (v->at(0) == 'x')
+        cleaned = v->substr(1);
+    else if (v->at(1) == 'x')
+        cleaned = v->substr(2);
     size_t digits = cleaned.length();
     return string(64 - digits, '0') + cleaned;
 }
 
 string Contract::GenerateBytesForString(const string *value)
 {
-    const char *valuePtr = value->c_str(); //don't fail if given a 'String'
+    const char *valuePtr = value->c_str(); // don't fail if given a 'String'
     size_t length = strlen(valuePtr);
     return GenerateBytesForBytes(valuePtr, length);
 }
@@ -289,9 +297,11 @@ string Contract::GenerateBytesForString(const string *value)
 string Contract::GenerateBytesForHexBytes(const string *value)
 {
     string cleaned = *value;
-    if (value->at(0) == 'x') cleaned = value->substr(1);
-    else if (value->at(1) == 'x') cleaned = value->substr(2);
-    string digitsStr = Util::intToHex(cleaned.length() / 2); //bytes length will be hex length / 2
+    if (value->at(0) == 'x')
+        cleaned = value->substr(1);
+    else if (value->at(1) == 'x')
+        cleaned = value->substr(2);
+    string digitsStr = Util::intToHex(cleaned.length() / 2); // bytes length will be hex length / 2
     string lengthDesignator = string(64 - digitsStr.length(), '0') + digitsStr;
     cleaned = lengthDesignator + cleaned;
     size_t digits = cleaned.length() % 64;
@@ -300,17 +310,19 @@ string Contract::GenerateBytesForHexBytes(const string *value)
 
 string Contract::GenerateBytesForStruct(const string *value)
 {
-    //struct has no length params: not required
+    // struct has no length params: not required
     string cleaned = *value;
-    if (value->at(0) == 'x') cleaned = value->substr(1);
-    else if (value->at(1) == 'x') cleaned = value->substr(2);
+    if (value->at(0) == 'x')
+        cleaned = value->substr(1);
+    else if (value->at(1) == 'x')
+        cleaned = value->substr(2);
     size_t digits = cleaned.length() % 64;
     return cleaned + (digits > 0 ? string(64 - digits, '0') : "");
 }
 
 string Contract::GenerateBytesForBytes(const char *value, const int len)
 {
-    string bytesStr = Util::ConvertBytesToHex((const uint8_t *)value, len).substr(2); //clean hex prefix;
+    string bytesStr = Util::ConvertBytesToHex((const uint8_t *)value, len).substr(2); // clean hex prefix;
     size_t digits = bytesStr.length() % 64;
     return bytesStr + (digits > 0 ? string(64 - digits, '0') : "");
 }
@@ -369,7 +381,7 @@ void Contract::Sign(uint8_t *hash, uint8_t *sig, int *recid)
     BYTE fullSig[65];
     crypto->Sign(hash, fullSig);
     *recid = fullSig[64];
-    memcpy(sig,fullSig, 64);
+    memcpy(sig, fullSig, 64);
 }
 
 vector<uint8_t> Contract::RlpEncodeForRawTransaction(
@@ -397,12 +409,12 @@ vector<uint8_t> Contract::RlpEncodeForRawTransaction(
     vector<uint8_t> outputData = Util::RlpEncodeItemWithVector(data);
 
     vector<uint8_t> R;
-    R.insert(R.end(), signature.begin(), signature.begin()+(SIGNATURE_LENGTH/2));
+    R.insert(R.end(), signature.begin(), signature.begin() + (SIGNATURE_LENGTH / 2));
     vector<uint8_t> S;
-    S.insert(S.end(), signature.begin()+(SIGNATURE_LENGTH/2), signature.end());
-    //V.push_back((uint8_t)(recid + web3->getChainId() * 2 + 35)); // according to EIP-155
+    S.insert(S.end(), signature.begin() + (SIGNATURE_LENGTH / 2), signature.end());
+    // V.push_back((uint8_t)(recid + web3->getChainId() * 2 + 35)); // according to EIP-155
     uint256_t vv = recid + (web3->getChainId() * 2) + 35; // EIP-155 ensure long chainIds work correctly
-    vector<uint8_t> V = vv.export_bits_truncate(); //convert to bytes
+    vector<uint8_t> V = vv.export_bits_truncate();        // convert to bytes
     vector<uint8_t> outputR = Util::RlpEncodeItemWithVector(R);
     vector<uint8_t> outputS = Util::RlpEncodeItemWithVector(S);
     vector<uint8_t> outputV = Util::RlpEncodeItemWithVector(V);

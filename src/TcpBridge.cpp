@@ -1,5 +1,5 @@
 #include "TcpBridge.h"
-#include "Web3.h"
+#include "Web3JBC.h"
 #include "Util.h"
 #include "KeyID.h"
 
@@ -17,7 +17,7 @@ TcpBridge::TcpBridge()
     Serial.println("Starting TCP Bridge");
 }
 
-void TcpBridge::setKey(KeyID *key, Web3 *w3)
+void TcpBridge::setKey(KeyID *key, Web3JBC *w3)
 {
     keyID = key;
     web3 = w3;
@@ -45,7 +45,7 @@ void TcpBridge::signChallenge(const BYTE *challenge, int length)
     Util::ConvertHexToBytes(packetBuffer + 1, keyID->getAddress().c_str(), 20); // address
     packetBuffer[0] = 0x07;                                                     // indicate using stright sig (ie not signPersonal)
     int packetLength = 1 + ETHERS_ADDRESS_LENGTH + ETHERS_SIGNATURE_LENGTH;
-    //Serial.println(Util::ConvertBytesToHex(packetBuffer, packetLength).c_str());
+    // Serial.println(Util::ConvertBytesToHex(packetBuffer, packetLength).c_str());
     write(packetBuffer, packetLength);
 }
 
@@ -97,7 +97,7 @@ void TcpBridge::checkClientAPI(TcpBridgeCallback callback)
         default:
             Serial.print("Unknown: ");
             Serial.println(type);
-            break;    
+            break;
         }
     }
 }
@@ -123,7 +123,7 @@ void TcpBridge::sendRefreshRequest()
     BYTE tokenVal[33];
     Util::ConvertHexToBytes(&tokenVal[1], keyID->getAddress().c_str(), 20);
     tokenVal[0] = 0x01;
-    //Serial.println(keyID->getAddress().c_str());
+    // Serial.println(keyID->getAddress().c_str());
     write(tokenVal, 21);
 }
 

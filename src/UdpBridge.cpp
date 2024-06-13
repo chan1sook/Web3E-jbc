@@ -1,9 +1,9 @@
 #include "UdpBridge.h"
-#include "Web3.h"
+#include "Web3JBC.h"
 #include "Util.h"
 #include "KeyID.h"
 
-//Bridge defaults - override these with setupConnection
+// Bridge defaults - override these with setupConnection
 static const uint16_t defaultPort = 8003;
 static const uint16_t topPort = 8003;
 static const char *hostName = "scriptproxy.smarttokenlabs.com";
@@ -23,13 +23,13 @@ UdpBridge::UdpBridge()
     pongCount = 0;
 }
 
-void UdpBridge::setKey(KeyID *key, Web3 *w3)
+void UdpBridge::setKey(KeyID *key, Web3JBC *w3)
 {
     keyID = key;
     web3 = w3;
 }
 
-void UdpBridge::setupConnection(std::string& svName, uint16_t p)
+void UdpBridge::setupConnection(std::string &svName, uint16_t p)
 {
     serverName = svName;
     port = p;
@@ -37,7 +37,7 @@ void UdpBridge::setupConnection(std::string& svName, uint16_t p)
 
 void UdpBridge::startConnection()
 {
-    //start default port and server
+    // start default port and server
     begin(port);
 }
 
@@ -77,7 +77,7 @@ void UdpBridge::checkClientAPI(BridgeCallback callback)
                 }
                 break;
             case 1:
-                //we received a response to signature, should be a confirm session key
+                // we received a response to signature, should be a confirm session key
                 if (length == 8 && connectionValidCountdown == 0 && memcmp(sessionBytes, packetBuffer + 2, 8) == 0)
                 {
                     connectionState = confirmed;
@@ -87,10 +87,10 @@ void UdpBridge::checkClientAPI(BridgeCallback callback)
                 }
                 break;
             case 2:
-                //API call
+                // API call
                 if (packetBuffer[1] == currentQueryId)
                 {
-                    //return the stored bytes
+                    // return the stored bytes
                     reSendResponse();
                 }
                 else
@@ -103,7 +103,7 @@ void UdpBridge::checkClientAPI(BridgeCallback callback)
                 }
                 break;
 
-            case 3: //PONG
+            case 3: // PONG
                 lastComms = millis();
                 pongCount++;
                 break;
@@ -118,7 +118,7 @@ void UdpBridge::scanAPI(const BYTE *packet, APIReturn *apiReturn, int payloadLen
 
     int index = 0;
 
-    //read length of API description
+    // read length of API description
     apiReturn->apiName = getArg(packet, index, payloadLength);
     Serial.print("API: ");
     Serial.println(apiReturn->apiName.c_str());
@@ -173,7 +173,7 @@ void UdpBridge::reSendResponse()
 
 void UdpBridge::sendRefreshRequest()
 {
-    packetBuffer[0] = 0x00; //fetch me a random
+    packetBuffer[0] = 0x00; // fetch me a random
     memcpy(packetBuffer + 1, sessionBytes, 8);
     packetBuffer[9] = 0x01;
     packetBuffer[10] = 0x00;
@@ -187,7 +187,7 @@ void UdpBridge::sendRefreshRequest()
 void UdpBridge::sendResponse(std::string resp, int methodId)
 {
     packetBuffer[0] = 0x02;
-    //add session token
+    // add session token
     memcpy(packetBuffer + 1, verifiedSessionBytes, 8);
     packetBuffer[9] = resp.length() + 1;
     packetBuffer[10] = (BYTE)methodId;
@@ -226,23 +226,23 @@ void UdpBridge::maintainComms()
                 connectionState = handshake;
                 memset(sessionBytes, 0, 8);
             }
-            if ((connectionValidCountdown%2) == 0)
+            if ((connectionValidCountdown % 2) == 0)
             {
-                sendPing(); //send PING every 4 seconds
+                sendPing(); // send PING every 4 seconds
             }
             break;
         }
 
-        if (connectionState != handshake && millis() > (lastComms + 30*1000))
+        if (connectionState != handshake && millis() > (lastComms + 30 * 1000))
         {
             connectionState = handshake;
             memset(sessionBytes, 0, 8);
         }
 
-        if (millis() > lastComms + 180*1000)
+        if (millis() > lastComms + 180 * 1000)
         {
             lastComms = millis();
-            //advance the port
+            // advance the port
             port++;
             if (port > topPort)
                 port = defaultPort;
@@ -255,11 +255,11 @@ void UdpBridge::sendSignature()
 {
     int packetLength = 0;
     packetBuffer[0] = 0x01;
-    //write signature of session token
+    // write signature of session token
     memcpy(packetBuffer + 1, sessionBytes, 8);
     packetBuffer[9] = ETHERS_SIGNATURE_LENGTH;
     keyID->getSignature(packetBuffer + 10, sessionBytes, 8);
-    //add session token
+    // add session token
     packetLength = 10 + ETHERS_SIGNATURE_LENGTH;
 
     memcpy(currentReturnBytes, packetBuffer, packetLength);
@@ -270,15 +270,15 @@ void UdpBridge::sendSignature()
     endPacket();
 }
 
-void UdpBridge::initRandomSeed(BYTE* randm) 
+void UdpBridge::initRandomSeed(BYTE *randm)
 {
-  //generate array
-  uint32_t randBuffer[3];
-  uint32_t *initKey = (uint32_t *) randm;
-  randBuffer[0] = initKey[0];
-  randBuffer[1] = initKey[1];
-  randBuffer[2] = micros();
-  randomInitFromBuffer(randBuffer, 3);
+    // generate array
+    uint32_t randBuffer[3];
+    uint32_t *initKey = (uint32_t *)randm;
+    randBuffer[0] = initKey[0];
+    randBuffer[1] = initKey[1];
+    randBuffer[2] = micros();
+    randomInitFromBuffer(randBuffer, 3);
 }
 
 boolean UdpBridge::isNewSession()
@@ -288,8 +288,8 @@ boolean UdpBridge::isNewSession()
 
 void UdpBridge::sendPing()
 {
-    packetBuffer[0] = 0x03; //Ping
-    //write signature of session token
+    packetBuffer[0] = 0x03; // Ping
+    // write signature of session token
     memcpy(packetBuffer + 1, verifiedSessionBytes, 8);
     beginPacket(hostName, port);
     write(packetBuffer, 9);
