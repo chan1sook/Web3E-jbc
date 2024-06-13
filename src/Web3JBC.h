@@ -23,7 +23,7 @@ class KeyID;
 #include "uint256/uint256_t.h"
 #include <WiFiClientSecure.h>
 #include <WiFiClient.h>
-#include <Contract.h>
+#include <Web3Contract.h>
 #include <Crypto.h>
 #include <KeyID.h>
 #include <Web3Util.h>

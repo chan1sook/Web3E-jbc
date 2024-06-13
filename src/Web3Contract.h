@@ -18,7 +18,7 @@
 
 using namespace std;
 
-class Contract
+class Web3Contract
 {
 
 public:
@@ -32,8 +32,8 @@ public:
     Options options;
 
 public:
-    Contract(Web3JBC *_web3, const char *address);
-    explicit Contract();
+    Web3Contract(Web3JBC *_web3, const char *address);
+    explicit Web3Contract();
     void SetPrivateKey(const char *key);
     string SetupContractData(const char *func, ...);
     string Call(const string *param);

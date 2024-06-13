@@ -34,10 +34,10 @@ Web3JBC *web3 = new Web3JBC();
 ## Ethereum transaction (ie send ETH to address):
 
 ``` C++
-// Setup Web3 and Contract with Private Key
+// Setup Web3 and Web3Contract with Private Key
 ...
 web3 = new Web3JBC();
-Contract contract(web3, "");
+Web3Contract contract(web3, "");
 contract.SetPrivateKey(PRIVATE_KEY);
 uint32_t nonceVal = (uint32_t)web3->EthGetTransactionCount(&address); //obtain the next nonce
 uint256_t weiValue = Web3Util::ConvertToWei(0.25, 18); //send 0.25 eth
@@ -57,7 +57,7 @@ string balanceStr = Web3Util::ConvertWeiToEthString(&balance, 18); //get string 
 ## Query ERC20 Balance:
 ``` C++
 string address = string("0x007bee82bdd9e866b2bd114780a47f2261c684e3");
-Contract contract(web3, "0x20fe562d797a42dcb3399062ae9546cd06f63280"); //contract is on Ropsten
+Web3Contract contract(web3, "0x20fe562d797a42dcb3399062ae9546cd06f63280"); //contract is on Ropsten
 
 //Obtain decimals to correctly display ERC20 balance (if you already know this you can skip this step)
 string param = contract.SetupContractData("decimals()", &address);
@@ -75,7 +75,7 @@ string balanceStr = Web3Util::ConvertWeiToEthString(&baseBalance, decimals); //c
 ## Send ERC20 Token:
 ``` C++
 string contractAddr = "0x20fe562d797a42dcb3399062ae9546cd06f63280";
-Contract contract(web3, contractAddr.c_str());
+Web3Contract contract(web3, contractAddr.c_str());
 contract.SetPrivateKey(<Your private key>);
 
 //Get contract name

@@ -7,7 +7,7 @@
 //
 //
 
-#include "Contract.h"
+#include "Web3Contract.h"
 #include "Web3JBC.h"
 #include <WiFi.h>
 #include "Web3Util.h"
@@ -19,7 +19,7 @@
  * Public functions
  * */
 
-Contract::Contract(Web3JBC *_web3, const char *address)
+Web3Contract::Web3Contract(Web3JBC *_web3, const char *address)
 {
     web3 = _web3;
     contractAddress = address;
@@ -30,15 +30,15 @@ Contract::Contract(Web3JBC *_web3, const char *address)
     crypto = NULL;
 }
 
-Contract::Contract() : Contract(new Web3JBC(), "") {}
+Web3Contract::Web3Contract() : Web3Contract(new Web3JBC(), "") {}
 
-void Contract::SetPrivateKey(const char *key)
+void Web3Contract::SetPrivateKey(const char *key)
 {
     crypto = new Crypto(web3);
     crypto->SetPrivateKey(key);
 }
 
-string Contract::SetupContractData(const char *func, ...)
+string Web3Contract::SetupContractData(const char *func, ...)
 {
     string ret = "";
 
@@ -159,13 +159,13 @@ string Contract::SetupContractData(const char *func, ...)
     return ret;
 }
 
-string Contract::ViewCall(const string *param)
+string Web3Contract::ViewCall(const string *param)
 {
     string result = web3->EthViewCall(param, contractAddress);
     return result;
 }
 
-string Contract::Call(const string *param)
+string Web3Contract::Call(const string *param)
 {
     const string from = string(options.from);
     const long gasPrice = strtol(options.gasPrice, nullptr, 10);
@@ -175,8 +175,8 @@ string Contract::Call(const string *param)
     return result;
 }
 
-string Contract::SendTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
-                                 string *toStr, uint256_t *valueStr, string *dataStr)
+string Web3Contract::SendTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
+                                     string *toStr, uint256_t *valueStr, string *dataStr)
 {
     uint8_t signature[SIGNATURE_LENGTH];
     memset(signature, 0, SIGNATURE_LENGTH);
@@ -192,9 +192,8 @@ string Contract::SendTransaction(uint32_t nonceVal, unsigned long long gasPriceV
     return web3->EthSendSignedTransaction(&paramStr, param.size());
 }
 
-string
-Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal, string *toStr,
-                          uint256_t *valueStr, string *dataStr)
+string Web3Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal, string *toStr,
+                                     uint256_t *valueStr, string *dataStr)
 {
 
     uint8_t signature[SIGNATURE_LENGTH];
@@ -214,7 +213,7 @@ Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uin
  * Utility functions
  **/
 
-void Contract::ReplaceFunction(std::string &param, const char *func)
+void Web3Contract::ReplaceFunction(std::string &param, const char *func)
 {
     param = GenerateContractBytes(func) + param.substr(10);
 }
@@ -223,8 +222,8 @@ void Contract::ReplaceFunction(std::string &param, const char *func)
  * Private functions
  **/
 
-void Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
-                                 string *toStr, uint256_t *valueStr, string *dataStr)
+void Web3Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
+                                     string *toStr, uint256_t *valueStr, string *dataStr)
 {
     vector<uint8_t> encoded = RlpEncode(nonceVal, gasPriceVal, gasLimitVal, toStr, valueStr, dataStr);
     // hash
@@ -241,7 +240,7 @@ void Contract::GenerateSignature(uint8_t *signature, int *recid, uint32_t nonceV
     Sign((uint8_t *)hash, signature, recid);
 }
 
-std::string Contract::GenerateContractBytes(const char *func)
+std::string Web3Contract::GenerateContractBytes(const char *func)
 {
     std::string in = Web3Util::ConvertBytesToHex((const uint8_t *)func, strlen(func));
     // get the hash of the input
@@ -251,18 +250,18 @@ std::string Contract::GenerateContractBytes(const char *func)
     return out;
 }
 
-string Contract::GenerateBytesForUint(const uint256_t *value)
+string Web3Contract::GenerateBytesForUint(const uint256_t *value)
 {
     std::vector<uint8_t> bits = value->export_bits();
     return Web3Util::PlainVectorToString(&bits);
 }
 
-string Contract::GenerateBytesForInt(const int32_t value)
+string Web3Contract::GenerateBytesForInt(const int32_t value)
 {
     return string(56, '0') + Web3Util::ConvertIntegerToBytes(value);
 }
 
-string Contract::GenerateBytesForUIntArray(const vector<uint32_t> *v)
+string Web3Contract::GenerateBytesForUIntArray(const vector<uint32_t> *v)
 {
     string dynamicMarker = std::string(64, '0');
     dynamicMarker.at(62) = '4'; // 0x000...40 Array Designator
@@ -276,7 +275,7 @@ string Contract::GenerateBytesForUIntArray(const vector<uint32_t> *v)
     return output;
 }
 
-string Contract::GenerateBytesForAddress(const string *v)
+string Web3Contract::GenerateBytesForAddress(const string *v)
 {
     string cleaned = *v;
     if (v->at(0) == 'x')
@@ -287,14 +286,14 @@ string Contract::GenerateBytesForAddress(const string *v)
     return string(64 - digits, '0') + cleaned;
 }
 
-string Contract::GenerateBytesForString(const string *value)
+string Web3Contract::GenerateBytesForString(const string *value)
 {
     const char *valuePtr = value->c_str(); // don't fail if given a 'String'
     size_t length = strlen(valuePtr);
     return GenerateBytesForBytes(valuePtr, length);
 }
 
-string Contract::GenerateBytesForHexBytes(const string *value)
+string Web3Contract::GenerateBytesForHexBytes(const string *value)
 {
     string cleaned = *value;
     if (value->at(0) == 'x')
@@ -308,7 +307,7 @@ string Contract::GenerateBytesForHexBytes(const string *value)
     return cleaned + (digits > 0 ? string(64 - digits, '0') : "");
 }
 
-string Contract::GenerateBytesForStruct(const string *value)
+string Web3Contract::GenerateBytesForStruct(const string *value)
 {
     // struct has no length params: not required
     string cleaned = *value;
@@ -320,14 +319,14 @@ string Contract::GenerateBytesForStruct(const string *value)
     return cleaned + (digits > 0 ? string(64 - digits, '0') : "");
 }
 
-string Contract::GenerateBytesForBytes(const char *value, const int len)
+string Web3Contract::GenerateBytesForBytes(const char *value, const int len)
 {
     string bytesStr = Web3Util::ConvertBytesToHex((const uint8_t *)value, len).substr(2); // clean hex prefix;
     size_t digits = bytesStr.length() % 64;
     return bytesStr + (digits > 0 ? string(64 - digits, '0') : "");
 }
 
-vector<uint8_t> Contract::RlpEncode(
+vector<uint8_t> Web3Contract::RlpEncode(
     uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
     string *toStr, uint256_t *val, string *dataStr)
 {
@@ -376,7 +375,7 @@ vector<uint8_t> Contract::RlpEncode(
     return encoded;
 }
 
-void Contract::Sign(uint8_t *hash, uint8_t *sig, int *recid)
+void Web3Contract::Sign(uint8_t *hash, uint8_t *sig, int *recid)
 {
     BYTE fullSig[65];
     crypto->Sign(hash, fullSig);
@@ -384,7 +383,7 @@ void Contract::Sign(uint8_t *hash, uint8_t *sig, int *recid)
     memcpy(sig, fullSig, 64);
 }
 
-vector<uint8_t> Contract::RlpEncodeForRawTransaction(
+vector<uint8_t> Web3Contract::RlpEncodeForRawTransaction(
     uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal,
     string *toStr, uint256_t *val, string *dataStr, uint8_t *sig, uint8_t recid)
 {

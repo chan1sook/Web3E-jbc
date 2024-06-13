@@ -10,8 +10,9 @@
 
 
 
-Web3JBC	KEYWORD1
-Web3Util KEYWORD1
+Web3JBC		KEYWORD1
+Web3Util	KEYWORD1
+Web3Contract		KEYWORD1
 
 
 #######################################
@@ -82,7 +83,6 @@ PrivateKeyToPublic		KEYWORD2
 PublicKeyToAddress		KEYWORD2
 Keccak256		KEYWORD2
 
-Contract		KEYWORD2
 SetPrivateKey		KEYWORD2
 SetupContractData		KEYWORD2
 Call		KEYWORD2

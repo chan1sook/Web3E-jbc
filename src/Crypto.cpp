@@ -34,7 +34,7 @@ bool Crypto::Sign(BYTE *digest, BYTE *result)
             allZero = false;
     if (allZero == true)
     {
-        Serial.println("Private key not set, generate a private key (eg use Metamask) and call Contract::SetPrivateKey with it.");
+        Serial.println("Private key not set, generate a private key (eg use Metamask) and call Web3Contract::SetPrivateKey with it.");
     }
     else
     {
