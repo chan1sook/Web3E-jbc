@@ -32,6 +32,9 @@ class KeyID;
 
 using namespace std;
 
+// TODO better int256 definition
+typedef uint256_t int256_t;
+
 enum ConnectionStage
 {
     unconnected,

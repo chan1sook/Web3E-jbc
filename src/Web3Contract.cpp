@@ -93,7 +93,15 @@ string Web3Contract::SetupContractData(const char *func, ...)
             isDynamic.push_back(false);
             dynamicStartPointer += 0x20;
         }
-        else if (strncmp(params[i].c_str(), "int", sizeof("int")) == 0 || strncmp(params[i].c_str(), "bool", sizeof("bool")) == 0)
+        else if (strncmp(params[i].c_str(), "int", sizeof("int")) == 0 || strncmp(params[i].c_str(), "int256", sizeof("int256")) == 0) // use uint256
+        {
+            string output = GenerateBytesForUint(va_arg(args, uint256_t *));
+            abiBlocks.push_back(output);
+            isDynamic.push_back(false);
+            dynamicStartPointer += 0x20;
+        }
+        // TODO handle uint/int others range than 256
+        else if (strncmp(params[i].c_str(), "bool", sizeof("bool")) == 0)
         {
             string output = GenerateBytesForInt(va_arg(args, int32_t));
             abiBlocks.push_back(output);
