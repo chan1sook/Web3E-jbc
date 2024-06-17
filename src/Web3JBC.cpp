@@ -4,105 +4,120 @@
 
 #include "Web3JBC.h"
 #include "Web3Util.h"
-#include "TagReader/TagReader.h"
 #include <iostream>
 #include <sstream>
 
-Web3JBC::Web3JBC()
+Web3JBC::Web3JBC() : _client(), _tagreader()
 {
-    mem = new BYTE[sizeof(WiFiClientSecure)];
-    selectHost();
+    _client.setInsecure();
 }
 
-string Web3JBC::Web3ClientVersion()
+// web3_clientVersion
+// return empty string if unsuccessful get
+string Web3JBC::web3_clientVersion()
 {
     string m = "web3_clientVersion";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getString(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? "" : getString(&output);
 }
 
-string Web3JBC::Web3Sha3(const string *data)
+// web3_sha3
+// return empty string if unsuccessful get
+string Web3JBC::web3_sha3(const string *data)
 {
     string m = "web3_sha3";
     string p = "[\"" + *data + "\"]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getString(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? "" : getString(&output);
 }
 
-int Web3JBC::NetVersion()
+// net_version: get chain id
+// return -1 if unsuccessful get
+long long int Web3JBC::net_version()
 {
     string m = "net_version";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? -1 : getLongLong(&output);
 }
 
-bool Web3JBC::NetListening()
+// net_listening
+// return false if unsuccessful get or return false
+bool Web3JBC::net_listening()
 {
     string m = "net_listening";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getBool(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? false : _get_bool(&output);
 }
 
-int Web3JBC::NetPeerCount()
+// net_peerCount
+// return -1 if unsuccessful get
+int Web3JBC::net_peerCount()
 {
     string m = "net_peerCount";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? -1 : getInt(&output);
 }
 
-double Web3JBC::EthProtocolVersion()
+// eth_protocolVersion
+// return -1 if unsuccessful get
+int Web3JBC::eth_protocolVersion()
 {
     string m = "eth_protocolVersion";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getDouble(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? -1 : getInt(&output);
 }
 
-bool Web3JBC::EthSyncing()
+// eth_syncing
+// return false if unsuccessful get or return false
+bool Web3JBC::eth_syncing()
 {
     string m = "eth_syncing";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string result = exec(&input);
-
-    return getBool(&result);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? false : _get_bool(&output);
 }
 
-bool Web3JBC::EthMining()
+// eth_mining
+// return false if unsuccessful get or return false
+bool Web3JBC::eth_mining()
 {
     string m = "eth_mining";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getBool(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? false : _get_bool(&output);
 }
 
-double Web3JBC::EthHashrate()
+long long int Web3JBC::eth_hashrate()
 {
     string m = "eth_hashrate";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getDouble(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? -1 : getLongLong(&output);
 }
 
-long long int Web3JBC::EthGasPrice()
+// eth_gasPrice
+// return -1 if unsuccessful
+long long int Web3JBC::eth_gasPrice()
 {
     string m = "eth_gasPrice";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getLongLong(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? -1 : getLongLong(&output);
 }
 
 void Web3JBC::EthAccounts(char **array, int size)
@@ -110,25 +125,27 @@ void Web3JBC::EthAccounts(char **array, int size)
     // JBC not store account then do nothings
 }
 
-int Web3JBC::EthBlockNumber()
+// eth_gasPrice
+// return -1 if unsuccessful
+long long int Web3JBC::eth_blockNumber()
 {
     string m = "eth_blockNumber";
     string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
+    return isOutputError(&output) ? -1 : getLongLong(&output);
 }
 
-uint256_t Web3JBC::EthGetBalance(const string *address)
+uint256_t Web3JBC::eth_getBalance(const string *address)
 {
     string m = "eth_getBalance";
     string p = "[\"" + *address + "\",\"latest\"]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
     return getUint256(&output);
 }
 
-string Web3JBC::EthViewCall(const string *data, const char *to)
+string Web3JBC::eth_call(const string *data, const char *to)
 {
     string m = "eth_call";
     string p = "[{\"data\":\""; // + *data;
@@ -136,63 +153,61 @@ string Web3JBC::EthViewCall(const string *data, const char *to)
     p += "\",\"to\":\"";
     p += to;
     p += "\"}, \"latest\"]";
-    string input = generateJson(&m, &p);
-    return exec(&input);
+    string input = _generate_json(&m, &p);
+    return _exec(&input);
 }
 
-int Web3JBC::EthGetTransactionCount(const string *address)
+int Web3JBC::eth_getTransactionCount(const string *address)
 {
     string m = "eth_getTransactionCount";
     string p = "[\"" + *address + "\",\"pending\"]"; // in case we need to push several transactions in a row
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
+    string input = _generate_json(&m, &p);
+    string output = _exec(&input);
     return getInt(&output);
 }
 
-string Web3JBC::EthCall(const string *from, const char *to, long gas, long gasPrice,
-                        const string *value, const string *data)
+string Web3JBC::eth_call(const string *from, const char *to, long gas, long gasPrice,
+                         const string *value, const string *data)
 {
     // TODO use gas, gasprice and value
     string m = "eth_call";
     string p = "[{\"from\":\"" + *from + "\",\"to\":\"" + *to + "\",\"data\":\"" + *data + "\"}, \"latest\"]";
-    string input = generateJson(&m, &p);
-    return exec(&input);
+    string input = _generate_json(&m, &p);
+    return _exec(&input);
 }
 
-string Web3JBC::EthSendSignedTransaction(const string *data, const uint32_t dataLen)
+string Web3JBC::eth_sendRawTransaction(const string *data, const uint32_t dataLen)
 {
     string m = "eth_sendRawTransaction";
     string p = "[\"" + *data + "\"]";
-    string input = generateJson(&m, &p);
+    string input = _generate_json(&m, &p);
 #if 0
     LOG(input);
 #endif
-    return exec(&input);
+    return _exec(&input);
 }
 
 // -------------------------------
 // Private
 
-string Web3JBC::generateJson(const string *method, const string *params)
+string Web3JBC::_generate_json(const string *method, const string *params)
 {
     return "{\"jsonrpc\":\"2.0\",\"method\":\"" + *method + "\",\"params\":" + *params + ",\"id\":0}";
 }
 
-string Web3JBC::exec(const string *data)
+string Web3JBC::_exec(const string *data)
 {
+    const char host[] = JBC_RPC_URL;
+    const char path[] = "/";
+    const unsigned int port = 443;
+
     string result;
 
-    client = new (mem) WiFiClientSecure();
-    setupCert();
-
-    int connected = client->connect(host, port);
+    int connected = _client.connect(host, port);
     if (!connected)
     {
         Serial.print("Unable to connect to Host: ");
         Serial.println(host);
-        delay(100);
-        // trigger a reset of the device
-        ESP.restart();
         return "";
     }
 
@@ -206,16 +221,16 @@ string Web3JBC::exec(const string *data)
     string strHost = "Host: " + string(host);
     string strContentLen = "Content-Length: " + lstr;
 
-    client->println(strPost.c_str());
-    client->println(strHost.c_str());
-    client->println("Content-Type: application/json");
-    client->println(strContentLen.c_str());
-    client->println();
-    client->println(data->c_str());
+    _client.println(strPost.c_str());
+    _client.println(strHost.c_str());
+    _client.println("Content-Type: application/json");
+    _client.println(strContentLen.c_str());
+    _client.println();
+    _client.println(data->c_str());
 
-    while (client->connected())
+    while (_client.connected())
     {
-        String line = client->readStringUntil('\n');
+        String line = _client.readStringUntil('\n');
         if (line == "\r")
         {
             break;
@@ -224,66 +239,67 @@ string Web3JBC::exec(const string *data)
 
     // if there are incoming bytes available
     // from the server, read them and print them:
-    while (client->available())
+    while (_client.available())
     {
-        char c = client->read();
+        char c = _client.read();
         result += c;
     }
-    client->flush();
-    client->stop();
-
-    client->~WiFiClientSecure();
+    _client.flush();
+    _client.stop();
 
     return result;
 }
 
+bool Web3JBC::isOutputError(const string *json)
+{
+    if (json->length() == 0)
+    {
+        return true;
+    }
+    string errorVal = _tagreader.getTag(json, "error");
+    return errorVal.length() > 0;
+}
+
 int Web3JBC::getInt(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     return strtol(parseVal.c_str(), nullptr, 16);
 }
 
-long Web3JBC::getLong(const string *json)
+long Web3JBC::_get_long(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     return strtol(parseVal.c_str(), nullptr, 16);
 }
 
 long long int Web3JBC::getLongLong(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     return strtoll(parseVal.c_str(), nullptr, 16);
 }
 
 uint256_t Web3JBC::getUint256(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     return uint256_t(parseVal.c_str());
 }
 
-double Web3JBC::getDouble(const string *json)
+double Web3JBC::_get_double(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     return strtof(parseVal.c_str(), nullptr);
 }
 
-bool Web3JBC::getBool(const string *json)
+bool Web3JBC::_get_bool(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     long v = strtol(parseVal.c_str(), nullptr, 16);
-    return v > 0;
+    return v != 0;
 }
 
 string Web3JBC::getResult(const string *json)
 {
-    TagReader reader;
-    string res = reader.getTag(json, "result");
+    string res = _tagreader.getTag(json, "result");
     if (res.length() == 0)
     {
         return string("");
@@ -299,8 +315,7 @@ string Web3JBC::getResult(const string *json)
 // Currently only works for string return eg: function name() returns (string)
 string Web3JBC::getString(const string *json)
 {
-    TagReader reader;
-    string parseVal = reader.getTag(json, "result");
+    string parseVal = _tagreader.getTag(json, "result");
     if (parseVal.length() == 0)
     {
         return string("");
@@ -325,44 +340,6 @@ string Web3JBC::getString(const string *json)
     delete v;
 
     return text;
-}
-
-/**
- * @brief Fetch TLS certificate for the node
- *
- * Force insecure mode because work fine
- */
-void Web3JBC::setupCert()
-{
-    client->setInsecure();
-}
-
-void Web3JBC::selectHost()
-{
-    std::string node = JBC_RPC_URL;
-
-    int ppos = node.find(":");
-    if (ppos > 0)
-    {
-        port = stoi(node.substr(ppos + 1));
-        node = node.substr(0, ppos);
-    }
-    else
-    {
-        port = 443;
-    }
-
-    ppos = node.find("/");
-    if (ppos > 0)
-    {
-        host = strdup(node.substr(0, ppos).c_str());
-        path = strdup(node.substr(ppos).c_str());
-    }
-    else
-    {
-        host = strdup(node.c_str());
-        path = "/";
-    }
 }
 
 long long Web3JBC::getChainId() const

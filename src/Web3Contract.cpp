@@ -169,7 +169,7 @@ string Web3Contract::SetupContractData(const char *func, ...)
 
 string Web3Contract::ViewCall(const string *param)
 {
-    string result = web3->EthViewCall(param, contractAddress);
+    string result = web3->eth_call(param, contractAddress);
     return result;
 }
 
@@ -179,7 +179,7 @@ string Web3Contract::Call(const string *param)
     const long gasPrice = strtol(options.gasPrice, nullptr, 10);
     const string value = "";
 
-    string result = web3->EthCall(&from, contractAddress, options.gas, gasPrice, &value, param);
+    string result = web3->eth_call(&from, contractAddress, options.gas, gasPrice, &value, param);
     return result;
 }
 
@@ -197,7 +197,7 @@ string Web3Contract::SendTransaction(uint32_t nonceVal, unsigned long long gasPr
                                                        signature, recid[0]);
 
     string paramStr = Web3Util::VectorToString(&param);
-    return web3->EthSendSignedTransaction(&paramStr, param.size());
+    return web3->eth_sendRawTransaction(&paramStr, param.size());
 }
 
 string Web3Contract::SignTransaction(uint32_t nonceVal, unsigned long long gasPriceVal, uint32_t gasLimitVal, string *toStr,
