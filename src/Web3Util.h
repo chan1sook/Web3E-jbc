@@ -17,7 +17,7 @@
 
 using namespace std;
 
-class Util {
+class Web3Util {
 public:
     // RLP implementation
     // reference:
