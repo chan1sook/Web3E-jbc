@@ -6,4 +6,3 @@
 #include "uint128_t.include"
 #include "uint256_t.include"
 #endif
-

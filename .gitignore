@@ -1,2 +1,4 @@
 # Visual Studio Code project files
 .vscode/
+.build/
+tmp/
