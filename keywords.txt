@@ -12,7 +12,7 @@
 
 Web3JBC		KEYWORD1
 Web3Util	KEYWORD1
-Web3Contract		KEYWORD1
+Web3JBCContract		KEYWORD1
 
 
 #######################################
@@ -58,7 +58,6 @@ ConvertNumberToUintArray		KEYWORD2
 ConvertNumberToVector		KEYWORD2
 ConvertCharStrToUintArray		KEYWORD2
 ConvertHexToVector		KEYWORD2
-ConvertToString		KEYWORD2
 
 HexToInt		KEYWORD2
 VectorToCharStr		KEYWORD2
@@ -73,6 +72,18 @@ InterpretStringResult		KEYWORD2
 InterpretVectorResult		KEYWORD2
 PadForward		KEYWORD2
 ConvertCharStrToVector32		KEYWORD2
+
+ConvertToWei		KEYWORD2
+ConvertWeiToEthString		KEYWORD2
+ConvertUint256ToString		KEYWORD2
+ConvertInt256ToString		KEYWORD2
+ConvertUint256ToStringWithDecimal		KEYWORD2
+ConvertInt256ToStringWithDecimal		KEYWORD2
+ConvertDecimalToUint256		KEYWORD2
+
+Substr		KEYWORD2
+Int256FromSigned		KEYWORD2
+
 Crypto		KEYWORD2
 Sign		KEYWORD2
 SetPrivateKey		KEYWORD2
@@ -88,9 +99,3 @@ SetupContractData		KEYWORD2
 Call		KEYWORD2
 ViewCall		KEYWORD2
 SendTransaction		KEYWORD2
-
-#######################################
-# Constants (LITERAL1)
-#######################################
- 
-BYTE	LITERAL1
