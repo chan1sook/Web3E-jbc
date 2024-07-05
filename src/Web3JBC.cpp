@@ -5,8 +5,15 @@
 
 #include "Web3JBC.h"
 
-Web3JBC::Web3JBC() : _client()
+Web3JBC::Web3JBC() : Web3JBC(JBC_ID, JBC_RPC_URL)
 {
+}
+
+Web3JBC::Web3JBC(const int64_t chainId, const String &host) : _client()
+{
+    _chainId = chainId;
+    strncpy(_host, host.c_str(), 127);
+
     _client.setInsecure();
 }
 
@@ -181,17 +188,18 @@ String Web3JBC::_generate_json(const String &method, const String &params)
 
 String Web3JBC::_exec(const String &data)
 {
-    const char host[] = JBC_RPC_URL;
     const char path[] = "/";
     const unsigned int port = 443;
 
     String result = "";
 
-    int connected = _client.connect(host, port);
+    int connected = _client.connect(_host, port);
     if (!connected)
     {
         Serial.print(F("Unable to connect to Host: "));
-        Serial.println(host);
+        Serial.println(_host);
+        Serial.print(F("Err: "));
+        Serial.println(_client.getWriteError());
         return "";
     }
 
@@ -201,7 +209,7 @@ String Web3JBC::_exec(const String &data)
     _client.println(F(" HTTP/1.1"));
 
     _client.print(F("Host: "));
-    _client.println(host);
+    _client.println(_host);
     _client.println(F("Content-Type: application/json"));
 
     _client.print(F("Content-Length: "));
@@ -345,5 +353,10 @@ String Web3JBC::getString(const String &json)
 
 int64_t Web3JBC::getChainId() const
 {
-    return JBC_ID;
+    return _chainId;
+}
+
+String Web3JBC::getHost()
+{
+    return _host;
 }

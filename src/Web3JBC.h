@@ -27,6 +27,7 @@ class Web3JBC
 {
 public:
     Web3JBC();
+    Web3JBC(const int64_t chainId, const String &host);
     String web3_clientVersion();
     String web3_sha3(const String &data);
     int64_t net_version();
@@ -54,6 +55,7 @@ public:
     bool isOutputError(const String &json);
 
     int64_t getChainId() const;
+    String getHost();
 
 private:
     String _exec(const String &data);
@@ -65,6 +67,8 @@ private:
 
 private:
     WiFiClientSecure _client;
+    int64_t _chainId;
+    char _host[128];
 };
 
 #endif // __WEB3JBC_H
