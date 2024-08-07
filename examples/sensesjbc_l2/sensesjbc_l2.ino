@@ -1,7 +1,6 @@
 /*
   Example - Testing Contract Interaction with Coldsenses JBC Contract with L2 Sensesiot Chain
-  Created by Natthawat Raocharoensinp, July 5, 2024.
-  Last Updated by Natthawat Raocharoensinp, August 7, 2024.
+  Created by Natthawat Raocharoensinp, August 7, 2024.
 */
 
 #include <Arduino.h>
@@ -19,20 +18,22 @@
 #define YOUR_ETH_ADDRESS "YOUR_ETH_ADDR"
 #define YOUR_ETH_PRIVATE_KEY "YOUR_ETH_PRIVATE_KEY"
 
-#define COLDSENSES_CONTRACT_ADDRESS "0xD0552DD8058adDE1D705962b92571c6065F1B147"
+#define SENSESJBC_CONTRACT_ADDRESS "0x9Ffb44AD8348444120fB88570e3C902cEDA73873"
 
 Web3JBC web3(7004, "sense-rpc.jibl2.com"); // must not include https://
-Web3JBCContract iotContract(&web3, COLDSENSES_CONTRACT_ADDRESS);
+Web3JBCContract iotContract(&web3, SENSESJBC_CONTRACT_ADDRESS);
 
 uint32_t txLastestTs;
 
 uint32_t balanceUpdateTs;
+uint32_t checkSlotUpdateTs;
 uint32_t dataUpdateTs;
 
 void setup_wifi();
 
 void get_jbc_balance();
 void get_lastest_data();
+void check_slot2();
 void push_iot_data();
 
 void setup()
@@ -46,8 +47,10 @@ void setup()
 
     get_jbc_balance();
     get_lastest_data();
+    check_slot2();
 
     balanceUpdateTs = millis();
+    checkSlotUpdateTs = millis();
     dataUpdateTs = millis() - 30000;
 }
 
@@ -63,6 +66,11 @@ void loop()
         balanceUpdateTs = millis();
         get_jbc_balance();
         get_lastest_data();
+    }
+    if (millis() - checkSlotUpdateTs >= 5000) // every 5 sec
+    {
+        checkSlotUpdateTs = millis();
+        check_slot2();
     }
 }
 
@@ -124,25 +132,12 @@ void get_lastest_data()
     else
     {
         uint256_t ts = uint256_t(Web3JBCUtil::Substr(result, 0, 64).c_str());
-        _int256_t temp = _int256_t(Web3JBCUtil::Substr(result, 64, 64).c_str());
-        _int256_t humid = _int256_t(Web3JBCUtil::Substr(result, 128, 64).c_str());
-        _int256_t lat = _int256_t(Web3JBCUtil::Substr(result, 192, 64).c_str());
-        _int256_t lng = _int256_t(Web3JBCUtil::Substr(result, 256, 64).c_str());
+        _int256_t data = _int256_t(Web3JBCUtil::Substr(result, 64, 64).c_str());
 
-        String tempStr = Web3JBCUtil::ConvertInt256ToStringWithDecimal(temp, 18);
-        String humidStr = Web3JBCUtil::ConvertInt256ToStringWithDecimal(humid, 18);
-        String latStr = Web3JBCUtil::ConvertInt256ToStringWithDecimal(lat, 18);
-        String lngStr = Web3JBCUtil::ConvertInt256ToStringWithDecimal(lng, 18);
+        String dataStr = Web3JBCUtil::ConvertInt256ToStringWithDecimal(data, 18);
 
-        Serial.print("Temp: ");
-        Serial.println(tempStr);
-        Serial.print("Humidity: ");
-        Serial.println(humidStr);
-        Serial.print("Gps: (");
-        Serial.print(latStr);
-        Serial.print(",");
-        Serial.print(lngStr);
-        Serial.println(")");
+        Serial.print("Data: ");
+        Serial.println(dataStr);
 
         if (ts != txLastestTs)
         {
@@ -156,14 +151,38 @@ void get_lastest_data()
     Serial.println("=================");
 }
 
+void check_slot2()
+{
+    uint256_t slot = uint256_t(1);
+    String param = iotContract.SetupContractData("getDataLastest(address,uint256)", YOUR_ETH_ADDRESS, &slot);
+    String rawResult = iotContract.ViewCall(param);
+    String result = web3.getResult(rawResult);
+
+    Serial.print("Check Slot Data #");
+    Serial.print(slot.str().c_str());
+    Serial.println(":");
+
+    if (web3.isOutputError(rawResult))
+    {
+        Serial.println("Read Contract Error");
+    }
+    else
+    {
+        _int256_t data = _int256_t(Web3JBCUtil::Substr(result, 64, 64).c_str());
+
+        String dataStr = Web3JBCUtil::ConvertInt256ToStringWithDecimal(data, 18);
+
+        Serial.print("Data: ");
+        Serial.println(dataStr);
+    }
+    Serial.println("=================");
+}
+
 void push_iot_data()
 {
-    const char *fnsig = "pushData(uint256,int256,int256,int256,int256)";
+    const char *fnsig = "pushData(uint256,int256)";
     int slot = 0;
-    double temp = random(2500, 3000) / 100.f;
-    double humid = random(5500, 6000) / 100.f;
-    double lat = 13.7563 + (random(0, 100) / 100000.f);
-    double lng = 100.5018 + (random(0, 100) / 100000.f);
+    double data = random(2500, 3000) / 100.f;
 
     Serial.print("Send Tx: ");
     Serial.println(fnsig);
@@ -179,24 +198,15 @@ void push_iot_data()
 
     // etup contract function call
     uint256_t slotParam = uint256_t(slot);
-    uint256_t tempParam = Web3JBCUtil::ConvertToWei(temp, 18);
-    uint256_t humidParam = Web3JBCUtil::ConvertToWei(humid, 18);
-    uint256_t latParam = Web3JBCUtil::ConvertToWei(lat, 18);
-    uint256_t lngParam = Web3JBCUtil::ConvertToWei(lng, 18);
+    uint256_t dataParam = Web3JBCUtil::ConvertToWei(data, 18);
 
-    Serial.print("(slot, temp, humid, lat, lng) => (");
+    Serial.print("(slot, data) => (");
     Serial.print(slotParam.str().c_str());
     Serial.print(",");
-    Serial.print(tempParam.str().c_str());
-    Serial.print(",");
-    Serial.print(humidParam.str().c_str());
-    Serial.print(",");
-    Serial.print(latParam.str().c_str());
-    Serial.print(",");
-    Serial.print(lngParam.str().c_str());
+    Serial.print(dataParam.str().c_str());
     Serial.println(")");
 
-    String params = iotContract.SetupContractData(fnsig, &slotParam, &tempParam, &humidParam, &latParam, &lngParam);
+    String params = iotContract.SetupContractData(fnsig, &slotParam, &dataParam);
 
     // Estimate gas here
     // 32000 x8
@@ -207,7 +217,7 @@ void push_iot_data()
 
     // push transaction to ethereum
     uint256_t paymentValue = uint256_0;
-    String result = iotContract.SendTransaction(nonceVal, gasPriceVal, gasLimitVal, COLDSENSES_CONTRACT_ADDRESS, paymentValue, params);
+    String result = iotContract.SendTransaction(nonceVal, gasPriceVal, gasLimitVal, SENSESJBC_CONTRACT_ADDRESS, paymentValue, params);
     if (web3.isOutputError(result))
     {
         Serial.println("Write Contract Error");

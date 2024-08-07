@@ -1,6 +1,7 @@
 /*
   Example - Testing Contract Interaction with Coldsenses JBC Contract
   Created by Natthawat Raocharoensinp, June 27, 2024.
+  Last Updated by Natthawat Raocharoensinp, August 7, 2024.
 */
 
 #include <Arduino.h>
@@ -22,8 +23,8 @@
 
 Web3JBC web3;
 Web3JBCContract iotContract(&web3, COLDSENSES_CONTRACT_ADDRESS);
-bool updateReady;
-uint256_t lastestTs;
+
+uint32_t txLastestTs;
 
 uint32_t balanceUpdateTs;
 uint32_t dataUpdateTs;
@@ -48,12 +49,11 @@ void setup()
 
     balanceUpdateTs = millis();
     dataUpdateTs = millis() - 30000;
-    updateReady = true;
 }
 
 void loop()
 {
-    if (millis() - dataUpdateTs >= 60000 && updateReady) // every 60 sec
+    if (millis() - dataUpdateTs >= 60000) // every 60 sec
     {
         dataUpdateTs = millis();
         push_iot_data();
@@ -144,14 +144,13 @@ void get_lastest_data()
         Serial.print(lngStr);
         Serial.println(")");
 
-        if (ts != lastestTs)
+        if (ts != txLastestTs)
         {
-            if (lastestTs != uint256_0)
+            if (txLastestTs != uint256_0)
             {
                 Serial.println("|| TX Mined ||");
             }
-            updateReady = true;
-            lastestTs = ts;
+            txLastestTs = ts;
         }
     }
     Serial.println("=================");
@@ -216,7 +215,6 @@ void push_iot_data()
     else
     {
         String tx = web3.getResult(result);
-        updateReady = false;
         Serial.print("TX Sent: [0x");
         Serial.print(tx);
         Serial.println("]");
